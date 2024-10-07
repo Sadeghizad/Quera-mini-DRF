@@ -17,15 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from rest_framework.routers import DefaultRouter
-router = DefaultRouter()
-
-
+# from rest_framework.routers import DefaultRouter
+# router = DefaultRouter()
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('user.urls')),
     path('', include('media.urls')),
     path('', include('financial.urls')),
-    path('',include(router.urls))
+    # path('',include(router.urls))
 ]

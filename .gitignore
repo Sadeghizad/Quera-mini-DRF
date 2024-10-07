@@ -5,7 +5,7 @@
 *.sqlite3
 __pycache__
 db.sqlite3
-media
+
 LAB.py
 OnlineAppointment/doctor/__pycache__
 OnlineAppointment/user/__pycache__

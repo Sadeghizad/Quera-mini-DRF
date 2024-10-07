@@ -6,17 +6,11 @@ from dj_rest_auth.registration.serializers import RegisterSerializer
 from dj_rest_auth.serializers import LoginSerializer
 from rest_framework import serializers
 from .models import *
-from media.models import Video
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id', 'username', 'email', 'phone_number', 'subscription_plan']
-
-class SubscriptionPlanSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SubscriptionPlan
-        fields = ['id', 'type', 'duration', 'price']
 
 
 
@@ -85,9 +79,5 @@ class CustomLoginSerializer(LoginSerializer):
         if user and not user.is_active:
             raise serializers.ValidationError(_("This account is inactive."))
 
+        # Generate JWT tokens
         return {'user': user}
-
-class SubscriptionPlanSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SubscriptionPlan
-        fields = "__all__"
