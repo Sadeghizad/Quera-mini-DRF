@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'allauth',
     'allauth.account',
+    'channels',
     'allauth.socialaccount',
     'dj_rest_auth.registration',
     'financial.apps.FinancialConfig',
@@ -142,6 +143,15 @@ USE_I18N = True
 
 USE_TZ = True
 
+ASGI_APPLICATION = 'mini2.asgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
