@@ -42,9 +42,10 @@ class Video(models.Model):
     release_date = models.DateField()
     duration = models.IntegerField()  # Duration in minutes
     age_restriction = models.CharField(max_length=10, blank=True, null=True)  # e.g., "PG-13"
-    country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True)
     subbed = models.BooleanField(default=False)
     dubbed = models.BooleanField(default=False)
+    views = models.PositiveIntegerField(default=0)
+    country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True)
     quality = models.ForeignKey(Quality, on_delete=models.SET_NULL, null=True)
     actors = models.ManyToManyField(Actor)  # Many-to-many with actors
     genres = models.ManyToManyField(Genre)  # Many-to-many with genres

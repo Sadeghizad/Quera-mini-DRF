@@ -1,6 +1,6 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from .models import Comment
+from .models import Comment,UserVideoInteraction
 from django.db import models
 
 @receiver(post_save, sender=Comment)
@@ -14,4 +14,10 @@ def update_video_rating(sender, instance, **kwargs):
         video.rating = avg_rating
     else:
         video.rating = None  # Reset rating if no comments
+    video.save()
+
+@receiver(post_save, sender=UserVideoInteraction)
+def update_video_views(sender,instance,*args, **kwargs):
+    video = instance.video
+    video.views = UserVideoInteraction.objects.filter(video=video).count()
     video.save()
