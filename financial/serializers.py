@@ -12,7 +12,7 @@ class InitiatePaymentSerializer(serializers.ModelSerializer):
 class RefundSerializer(serializers.ModelSerializer):
     class Meta:
         model = Refund
-        fields = ["id", "payment", "refund_id", "amount", "refund_status", "created_at"]
+        fields = ["payment", "amount", "refund_status", "created_at"]
 
 
 class SubscriptionPlanSerializer(serializers.ModelSerializer):

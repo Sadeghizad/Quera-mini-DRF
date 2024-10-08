@@ -1,4 +1,4 @@
-from .models import Payment, SubscriptionPlan
+from .models import Payment, SubscriptionPlan, Refund
 from .utils import subscriptions
 import requests
 from rest_framework.views import APIView
@@ -6,10 +6,11 @@ from rest_framework.response import Response
 from django.http import JsonResponse
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.generics import CreateAPIView
-from .serializers import InitiatePaymentSerializer
+from .serializers import InitiatePaymentSerializer, RefundSerializer
 from django.shortcuts import get_object_or_404
-
-
+from datetime import timedelta
+from django.utils import timezone
+from decimal import Decimal
 class InitiatePaymentView(CreateAPIView):
     queryset = Payment.objects.all()
     serializer_class = InitiatePaymentSerializer
@@ -72,3 +73,59 @@ class PaymentCallbackView(APIView):
             return Response({"message": "Payment status updated successfully"})
         except Payment.DoesNotExist:
             return Response({"error": "Payment not found"}, status=404)
+
+
+class InitiateRefundView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = RefundSerializer
+    def get(self, request, *args, **kwargs):
+        user=request.user
+        refunds = Refund.objects.filter(payment__user=user)
+        serializer = self.serializer_class(refunds, many=True)  # Serialize the refunds
+        return Response(serializer.data)
+
+
+    def post(self, request, *args, **kwargs):
+        payment_id = request.data.get('payment_id')
+
+        # Ensure the payment exists and belongs to the user
+        payment = get_object_or_404(Payment, id=payment_id, user=request.user)
+
+        # Check if a refund is already in process or completed
+        if Refund.objects.filter(payment=payment).exists():
+            return Response({"error": "Refund already processed or in process"}, status=400)
+
+        # Check if the refund amount is valid
+        time_difference = timezone.now() - payment.created_at
+        if time_difference <= timedelta(days=1):
+            refund_amount = payment.amount
+        elif time_difference <= timedelta(days=3):
+            refund_amount = payment.amount * Decimal(0.8)
+        elif time_difference <= timedelta(days=7):
+            refund_amount = payment.amount * Decimal(0.5)
+        elif time_difference <= timedelta(days=10):
+            refund_amount = payment.amount * Decimal(0.2)
+        elif time_difference <= timedelta(days=14):
+            refund_amount = 0
+        else:
+            return Response({"error": "Refund period expired"}, status=400)
+
+        # Create the refund object
+        refund = Refund.objects.create(
+            payment=payment,
+            amount=refund_amount,
+            refund_status="pending"  # Set status as pending initially
+        )
+
+        # a function to add amount to wallet or call bank api to send money
+        def cash_handle_some_how():
+            pass
+        #mock the refund as successful
+        refund.refund_status = "successful"
+        # refund.refund_status = "failed"
+        refund.save()
+        subscription = payment.subscription.get()
+        if subscription:
+            subscription.is_active = False
+            subscription.save()
+        return Response({"message": "Refund initiated successfully", "refund_id": refund.id})

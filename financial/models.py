@@ -53,9 +53,6 @@ class Refund(models.Model):
     payment = models.ForeignKey(
         Payment, on_delete=models.CASCADE
     )  # Link to the Payment model
-    refund_id = models.CharField(
-        max_length=255, null=True, blank=True
-    )  # Zibal refund ID
     amount = models.DecimalField(max_digits=10, decimal_places=2)  # Amount refunded
     refund_status = models.CharField(
         max_length=10, choices=REFUND_STATUS_CHOICES, default="pending"
@@ -76,7 +73,7 @@ class SubscriptionPayment(models.Model):
         SubscriptionPlan, on_delete=models.CASCADE
     )  # Link to SubscriptionPlan model in user app
     payment = models.ForeignKey(
-        Payment, on_delete=models.CASCADE
+        Payment, on_delete=models.CASCADE,related_name='subscription'
     )  # Link to the Payment model
     start_date = models.DateField()  # Subscription start date
     end_date = models.DateField()  # Subscription end date

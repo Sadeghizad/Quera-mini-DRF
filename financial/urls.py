@@ -1,5 +1,5 @@
 from rest_framework.routers import DefaultRouter
-from .views import InitiatePaymentView, PaymentCallbackView
+from .views import InitiatePaymentView, PaymentCallbackView, InitiateRefundView
 from .viewsets import SubscriptionPlanViewSet,PaymentHistory
 from django.urls import path, include
 router = DefaultRouter()
@@ -9,4 +9,6 @@ urlpatterns = [
     path('payment/initiate/', InitiatePaymentView.as_view(), name='initiate_payment'),
     path('payment/callback/', PaymentCallbackView.as_view(), name='payment_callback'),
     path('', include(router.urls)),
+    path('payment/refund/', InitiateRefundView.as_view(), name='initiate_refund'),
 ]
+
