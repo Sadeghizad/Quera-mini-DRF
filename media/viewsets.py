@@ -23,7 +23,8 @@ from .serializers import (
     WatchListSerializer,
     UserVideoInteractionSerializer,
 )
-from rest_framework.permissions import IsAuthenticated,AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny
+
 
 class VideoViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
@@ -64,6 +65,17 @@ class SeasonViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     queryset = Comment.objects.all()
+    def get_queryset(self):
+        # Get all comments and filter by 'video_id' if it's passed as a query parameter
+        queryset = Comment.objects.all()
+        video_id = self.request.query_params.get('video_id', None)
+        if video_id is not None:
+            queryset = queryset.filter(video_id=video_id)
+        return queryset
+
+    def perform_create(self, serializer):
+        video_id = self.request.query_params.get('video_id', None)
+        serializer.save(user=self.request.user, video_id=int(video_id))
 
 
 class WatchListViewSet(viewsets.ModelViewSet):
@@ -72,5 +84,12 @@ class WatchListViewSet(viewsets.ModelViewSet):
 
 
 class UserVideoInteractionViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
     serializer_class = UserVideoInteractionSerializer
-    UserVideoInteraction = UserVideoInteraction.objects.all()
+
+    def get_queryset(self):
+        return UserVideoInteraction.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        # Automatically assign the authenticated user to the UserVideoInteraction
+        serializer.save(user=self.request.user)

@@ -52,9 +52,16 @@ class SeasonSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+
     class Meta:
         model = Comment
-        fields = ["id", "video", "user", "text", "rate", "comment_rate"]
+        fields = ["user", "text", "rate", "comment_rate"]
+        extra_kwarg = {"user": {"requierd": False}}
+        read_only_fields = ["user"]
+
+    def get_user(self, obj):
+        return obj.user.username
 
 
 class WatchListSerializer(serializers.ModelSerializer):
@@ -86,4 +93,4 @@ class CountrySerializer(serializers.ModelSerializer):
 class UserVideoInteractionSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserVideoInteraction
-        fields = "__all__"
+        fields = ["date", "video", "last_minute"]

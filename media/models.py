@@ -74,8 +74,8 @@ class Comment(models.Model):
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     text = models.TextField()
-    rate = models.DecimalField(max_digits=3, decimal_places=1)  # Rating out of 10
-    comment_rate = models.IntegerField(default=0)  # Upvotes or likes for the comment
+    rate = models.DecimalField(max_digits=3, decimal_places=1)
+    comment_rate = models.IntegerField(default=0)
 
     def __str__(self):
         return f"Comment by {self.user.username} on {self.video.title}"
@@ -90,15 +90,10 @@ class WatchList(models.Model):
         return f"{self.name} by {self.user.username}"
 # UserVideoInteraction Model
 class UserVideoInteraction(models.Model):
-    INTERACTION_TYPE = [
-        ('unseen', 'Unseen'),
-        ('watched', 'Watched'),
-        ('remain', 'Remain')
-    ]
-    interaction_type = models.CharField(max_length=10, choices=INTERACTION_TYPE)
     date = models.DateField(auto_now_add=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)  # Change here
-    video = models.ForeignKey('media.Video', on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # Change here
+    video = models.ForeignKey('media.Video', on_delete=models.CASCADE)
+    last_minute = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return f"{self.user.username} - {self.interaction_type} - {self.video.title}"
+        return f"{self.user.username} - {self.video.title}"
