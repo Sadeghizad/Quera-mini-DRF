@@ -47,7 +47,7 @@ class PaymentHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
         fields = [
-            "subscriptionplan_type",  # Show the type instead of the whole subscriptionplan object
+            "subscriptionplan_type",  
             "transaction_id",
             "updated_at",
             "amount",

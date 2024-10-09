@@ -42,7 +42,7 @@ class IdBasedCursorPagination(CursorPagination):
         """
         Given a request with a cursor, return a `Cursor` instance.
         """
-        # Determine if we have a cursor, and if so then decode it.
+        
         encoded = request.query_params.get(self.cursor_query_param)
         if encoded is None:
             return None

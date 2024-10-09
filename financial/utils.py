@@ -10,10 +10,10 @@ def is_subscription_active(user):
 def subscriptions(payment,user, subscription_plan):
     current_date = timezone.now().date()
     
-    # Get the last subscription, if it exists
+    
     last_sub = user.subs_payment.all().order_by('-id').first()
 
-    if last_sub and last_sub.is_active:  # Check if last_sub exists and is active
+    if last_sub and last_sub.is_active:  
         SubscriptionPayment.objects.create(
             user=user,
             payment=payment,

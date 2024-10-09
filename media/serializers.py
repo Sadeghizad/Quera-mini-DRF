@@ -5,10 +5,10 @@ from .models import *
 class VideoSerializer(serializers.ModelSerializer):
     actors = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Actor.objects.all()
-    )  # Adjust this based on your need
+    )  
     genres = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Genre.objects.all()
-    )  # Adjust this based on your need
+    )  
 
     class Meta:
         model = Video
@@ -44,7 +44,7 @@ class SeriesSerializer(serializers.ModelSerializer):
 
 
 class SeasonSerializer(serializers.ModelSerializer):
-    series = SeriesSerializer()  # Optionally nest the Series
+    series = SeriesSerializer()  
 
     class Meta:
         model = Season
@@ -63,13 +63,15 @@ class CommentSerializer(serializers.ModelSerializer):
     def get_user(self, obj):
         return obj.user.username
 
-
 class WatchListSerializer(serializers.ModelSerializer):
     videos = serializers.PrimaryKeyRelatedField(many=True, queryset=Video.objects.all())
-
+    user = serializers.SerializerMethodField()
     class Meta:
         model = WatchList
-        fields = ["id", "name", "user", "videos"]
+        fields = ["name", "user", "videos"]
+        read_only_fields = ["user"]
+    def get_user(self, obj):
+        return obj.user.username
 
 
 class QualitySerializer(serializers.ModelSerializer):

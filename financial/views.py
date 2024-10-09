@@ -4,7 +4,7 @@ import requests
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import JsonResponse
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.generics import CreateAPIView
 from .serializers import InitiatePaymentSerializer, RefundSerializer
 from django.shortcuts import get_object_or_404
@@ -14,20 +14,19 @@ from decimal import Decimal
 class InitiatePaymentView(CreateAPIView):
     queryset = Payment.objects.all()
     serializer_class = InitiatePaymentSerializer
-    permission_classes = [AllowAny]
-
+    permission_classes = [IsAuthenticated]
     def create(self, request, *args, **kwargs):
         user = request.user
         subscriptionplan_id = request.data.get("subscriptionplan")
 
-        # Get the subscription plan instance
+        
         subscriptionplan = get_object_or_404(SubscriptionPlan, id=subscriptionplan_id)
 
-        # Create payment object with the amount from subscription plan
+        
         payment = Payment.objects.create(
             user=user,
             subscriptionplan=subscriptionplan,
-            amount=subscriptionplan.price,  # Set amount from the subscription plan's price
+            amount=subscriptionplan.price,  
         )
 
         # Mocked IPG URL (replace with actual IPG URL if needed)
@@ -51,6 +50,7 @@ class InitiatePaymentView(CreateAPIView):
 
 
 class PaymentCallbackView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         payment_id = request.data.get("PaymentId")
         status = request.data.get("status")
@@ -76,26 +76,26 @@ class PaymentCallbackView(APIView):
 
 
 class InitiateRefundView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdminUser]
     serializer_class = RefundSerializer
     def get(self, request, *args, **kwargs):
         user=request.user
         refunds = Refund.objects.filter(payment__user=user)
-        serializer = self.serializer_class(refunds, many=True)  # Serialize the refunds
+        serializer = self.serializer_class(refunds, many=True)  
         return Response(serializer.data)
 
 
     def post(self, request, *args, **kwargs):
         payment_id = request.data.get('payment_id')
 
-        # Ensure the payment exists and belongs to the user
+        
         payment = get_object_or_404(Payment, id=payment_id, user=request.user)
 
-        # Check if a refund is already in process or completed
+        
         if Refund.objects.filter(payment=payment).exists():
             return Response({"error": "Refund already processed or in process"}, status=400)
 
-        # Check if the refund amount is valid
+        
         time_difference = timezone.now() - payment.created_at
         if time_difference <= timedelta(days=1):
             refund_amount = payment.amount
@@ -110,17 +110,17 @@ class InitiateRefundView(APIView):
         else:
             return Response({"error": "Refund period expired"}, status=400)
 
-        # Create the refund object
+        
         refund = Refund.objects.create(
             payment=payment,
             amount=refund_amount,
-            refund_status="pending"  # Set status as pending initially
+            refund_status="pending"  
         )
 
-        # a function to add amount to wallet or call bank api to send money
+        
         def cash_handle_some_how():
             pass
-        #mock the refund as successful
+        
         refund.refund_status = "successful"
         # refund.refund_status = "failed"
         refund.save()

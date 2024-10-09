@@ -6,4 +6,4 @@ class MediaConfig(AppConfig):
     name = 'media'
 
     def ready(self):
-        import media.signals  # Import the signals module here
+        import media.signals  
